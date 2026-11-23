@@ -5,6 +5,7 @@
 """
 
 import json
+import random
 from functools import cache
 from pathlib import Path
 
@@ -126,3 +127,18 @@ def search_graph(query: str) -> str:
         return json.dumps({"error": str(e)}, ensure_ascii=False)
     except APIError as e:
         return json.dumps({"error": api_error_message(e.code)}, ensure_ascii=False)
+
+
+def make_quiz(lecture: int) -> str:
+    """指定した回（1始まりの整数）の用語から1つ選び、確認問題と答えを返す。
+
+    「第2回の確認問題を出して」のように、問題やクイズを求められたときに使う。
+    """
+    terms = [e for e in load_glossary() if e["lecture"] == lecture]
+    if not terms:
+        return f"第{lecture}回の用語は用語集にありません。"
+    e = random.choice(terms)
+    return json.dumps(
+        {"question": f"「{e['term']}」の意味は？", "answer": e["definition"]},
+        ensure_ascii=False,
+    )
